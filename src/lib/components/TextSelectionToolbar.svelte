@@ -161,7 +161,7 @@ TODO:
                 {/if}
                 {#if isRepeatableAudio && $refs.hasAudio && $refs.hasAudio.timingFile}
                     <button class="dy-btn-sm dy-btn-ghost">
-                        <AudioIcon.PlayRepeat color={iconColor} />
+                        <AudioIcon.PlayRepeat onclick={() => playSelectionAudio()}> color={iconColor} />
                     </button>
                 {/if}
                 {#if isTextOnImageEnabled}

@@ -2,6 +2,7 @@ import { derived, get, writable } from 'svelte/store';
 import { isDefined } from '../../scripts/stringUtils';
 import config from '../config';
 import { loadDocSetIfNotLoaded } from '../scripture';
+import { getVerseText } from './getVerseText';
 import { pk } from './pk';
 import { referenceStore } from './reference';
 import { setDefaultStorage } from './storage';
@@ -75,37 +76,37 @@ export function getReference(item) {
     return bookName + ' ' + item.chapter + separator + item.verse;
 }
 
-export async function getVerseText(item, item2 = undefined) {
-    const proskomma = get(pk);
-    const scriptureCV =
-        item2 !== undefined
-            ? item.chapter === item2.chapter
-                ? `${item.chapter}:${item.verse}-${item2.verse}`
-                : `${item.chapter}:${item.verse}-${item2.chapter}:${item2.verse}`
-            : `${item.chapter}:${item.verse}`;
-    //console.log('getVerseText', scriptureCV);
-    const query = `{
-      docSet (id: "${item.docSet}") {
-          document(bookCode:"${item.book}") {
-              mainSequence {
-                  blocks(withScriptureCV: "${scriptureCV}") {
-                      text(withScriptureCV: "${scriptureCV}" normalizeSpace:true )
-                  }
-              }
-          }
-      }
-  }`;
-    //console.log(query);
+// export async function getVerseText(item, item2 = undefined) {
+//     const proskomma = get(pk);
+//     const scriptureCV =
+//         item2 !== undefined
+//             ? item.chapter === item2.chapter
+//                 ? `${item.chapter}:${item.verse}-${item2.verse}`
+//                 : `${item.chapter}:${item.verse}-${item2.chapter}:${item2.verse}`
+//             : `${item.chapter}:${item.verse}`;
+//     //console.log('getVerseText', scriptureCV);
+//     const query = `{
+//       docSet (id: "${item.docSet}") {
+//           document(bookCode:"${item.book}") {
+//               mainSequence {
+//                   blocks(withScriptureCV: "${scriptureCV}") {
+//                       text(withScriptureCV: "${scriptureCV}" normalizeSpace:true )
+//                   }
+//               }
+//           }
+//       }
+//   }`;
+//     //console.log(query);
 
-    const { data } = await proskomma.gqlQuery(query);
-    let text = [];
-    for (const block of data.docSet.document.mainSequence.blocks) {
-        if (block.text) {
-            text.push(block.text);
-        }
-    }
-    return text.join(' ');
-}
+//     const { data } = await proskomma.gqlQuery(query);
+//     let text = [];
+//     for (const block of data.docSet.document.mainSequence.blocks) {
+//         if (block.text) {
+//             text.push(block.text);
+//         }
+//     }
+//     return text.join(' ');
+// }
 
 export const docSet = derived(refs, ($refs) => $refs.docSet);
 /*
@@ -336,6 +337,17 @@ function createSelectedVerses() {
                 verseText.push(t);
             }
             return verseText.join(' ');
+        },
+
+        getFirstAndLastVerseNumbers: () => {
+            const selections = get(external);
+            if (selections.length === 0) {
+                return null;
+            }
+            return {
+                first: selections[0].verse,
+                last: selections[selections.length - 1].verse
+            };
         }
     };
 }
